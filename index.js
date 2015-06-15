@@ -76,6 +76,9 @@ app.post('/api/users', function(req, res) {
 
     // establish session
     req.login(user, function(err) {
+      if (err) {
+        return res.sendStatus(500);
+      }
       res.sendStatus(200);
     });
 });
@@ -117,6 +120,13 @@ app.post('/api/auth/login', function(req, res, next) {
     });
 
   })(req, res, next);
+});
+
+
+app.post('/api/auth/logout', function(req, res) {
+  // clear session
+  req.logout();
+  res.sendStatus(200);
 });
 
 
