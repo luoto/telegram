@@ -6,6 +6,7 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var shortid = require('shortid');
 var passport = require('./auth');
+var config = require('./config');
 
 var app = express();
 
@@ -150,7 +151,7 @@ app.delete('/api/tweets/:tweetId', ensureAuthentication, function(req, res) {
     }
 });
 
-var server = app.listen(3000, '127.0.0.1');
+var server = app.listen(config.get('server:port'), config.get('server:host'));
 
 
 function ensureAuthentication(req, res, next) {
