@@ -76,11 +76,16 @@ app.post('/api/users', function(req, res) {
     res.sendStatus(200);
 });
 
-app.post('/api/tweets', function(req, res) {
+app.post('/api/tweets', ensureAuthentication, function(req, res) {
     var tweet = req.body.tweet;
+
 
     tweet.created = Math.floor(Date.now() / 1000);
     tweet.id = shortid.generate();
+
+    // overwrite the userId field with the authenticated user id
+    tweet.userId = req.user.id;
+
     fixtures.tweets.push(tweet);
 
     res.send({
@@ -115,8 +120,8 @@ app.delete('/api/tweets/:tweetId', ensureAuthentication, function(req, res) {
     var tweetId = req.params.tweetId;
     var tweet = _.find(fixtures.tweets, { id: tweetId });
 
-    if (req.user != user){
-      return sendStatus(403);
+    if (req.user.id != tweet.userId){
+       return res.sendStatus(403);
     }
 
     if (!_.isUndefined(tweet)) {
