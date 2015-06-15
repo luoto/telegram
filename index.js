@@ -7,11 +7,11 @@ var cookieParser = require('cookie-parser');
 var shortid = require('shortid');
 var passport = require('./auth');
 
-
 var app = express();
 
 app.use(bodyParser.json());
 app.use(cookieParser());
+
 app.use(session({
   secret: 'keyboard cat',
   resave: false,
@@ -21,6 +21,7 @@ app.use(session({
 // depends on the other middleware
 app.use(passport.initialize());
 app.use(passport.session());
+
 
 app.get('/api/users/:userId', function(req, res) {
     var userId = req.params.userId;
@@ -88,9 +89,35 @@ app.post('/api/tweets', function(req, res) {
 
 });
 
-app.delete('/api/tweets/:tweetId', function(req, res) {
+app.post('/api/auth/login', function(req, res, next) {
+  passport.authenticate('local', function(err, user, info) {
+
+    if (err) {
+      return res.sendStatus(500);
+    }
+
+    if (!user) {
+      return res.sendStatus(403);
+    }
+
+    req.login(user, function(err) {
+        if (err) {
+          return res.sendStatus(500);
+        }
+        return res.send({ user: user });
+    });
+
+  })(req, res, next);
+});
+
+
+app.delete('/api/tweets/:tweetId', ensureAuthentication, function(req, res) {
     var tweetId = req.params.tweetId;
     var tweet = _.find(fixtures.tweets, { id: tweetId });
+
+    if (req.user != user){
+      return sendStatus(403);
+    }
 
     if (!_.isUndefined(tweet)) {
         _.remove(fixtures.tweets, function(tweet) {
@@ -105,5 +132,15 @@ app.delete('/api/tweets/:tweetId', function(req, res) {
 });
 
 var server = app.listen(3000, '127.0.0.1');
+
+
+function ensureAuthentication(req, res, next) {
+  if (req.isAuthenticated()) {
+    next();
+  }
+  else {
+    res.sendStatus(403);
+  }
+}
 
 module.exports = server;
