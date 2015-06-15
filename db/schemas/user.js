@@ -1,7 +1,6 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+var Schema = require('mongoose').Schema;
 
-var User = new Schema({
+var userSchema = new Schema({
   id: { type: String, unique: true},
   name: String,
   email: {type: String, unique: true},
@@ -9,4 +8,4 @@ var User = new Schema({
   followingIds: {type: [String], default: []}
 });
 
-module.exports = User;
+module.exports = userSchema;
