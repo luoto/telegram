@@ -1,16 +1,26 @@
 var _ = require('lodash');
 var express = require('express');
+var session = require('express-session');
 var fixtures = require('./fixtures');
 var bodyParser = require('body-parser');
-var cookieParser = require('cookieParser');
+var cookieParser = require('cookie-parser');
 var shortid = require('shortid');
-var session = require('express-session');
+var passport = require('./auth');
+
 
 var app = express();
-var jsonParser = bodyParser.json();
 
-app.use(jsonParser);
+app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true
+}));
+
+// depends on the other middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.get('/api/users/:userId', function(req, res) {
     var userId = req.params.userId;
@@ -21,7 +31,6 @@ app.get('/api/users/:userId', function(req, res) {
     }
 
     res.send({ user: user });
-
 });
 
 app.get('/api/tweets', function(req, res) {
