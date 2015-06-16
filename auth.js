@@ -19,6 +19,10 @@ passport.use(new LocalStrategy(verify));
 
 function verify(username, password, done) {
   conn.model('User').findOne({ id: username }, function(err, user) {
+    if(err) {
+      return done(err);
+    }
+
     if(!user) {
       return done(null, false, { message: 'Incorrect username.' });
     }
