@@ -26,15 +26,18 @@ app.use(passport.session());
 
 
 app.get('/api/users/:userId', function(req, res) {
-    var userId = req.params.userId;
-    var user = _.find(fixtures.users, { id: userId });
-
-    if (!user) {
-        res.sendStatus(404);
-    }
-
-    res.send({ user: user });
+    // find and send user in db
+    conn.model('User').findOne({ id: req.params.userId }, function(err, user) {
+      if (err) {
+        res.sendStatus(500);
+      }
+      if (!user) {
+          res.sendStatus(404);
+      }
+      res.send({ user: user });
+    });
 });
+
 
 app.get('/api/tweets', function(req, res) {
     var userId = req.query.userId;
@@ -158,6 +161,28 @@ app.delete('/api/tweets/:tweetId', ensureAuthentication, function(req, res) {
     }
 });
 
+
+app.put('/api/users/:userId', ensureAuthentication, function(req, res) {
+  // ensure sure that the person that is making changes to his own account
+  if (req.params.userId !== req.user.id) {
+    return res.sendStatus(403);
+  }
+
+  // parameters for update
+  var query = { id: req.params.userId };
+  var update = { password: req.body.password };
+
+  // update password
+  conn.model('User').findOneAndUpdate(query, update, function(err, user) {
+      if (err) {
+        return res.sendStatus(500);
+      }
+      res.sendStatus(200);
+    }
+  );
+});
+
+
 var server = app.listen(config.get('server:port'), config.get('server:host'));
 
 
@@ -169,5 +194,6 @@ function ensureAuthentication(req, res, next) {
     res.sendStatus(403);
   }
 }
+
 
 module.exports = server;
