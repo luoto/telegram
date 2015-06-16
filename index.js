@@ -8,6 +8,7 @@ var shortid = require('shortid');
 var passport = require('./auth');
 var config = require('./config');
 var conn = require('./db');
+var ObjectId = require('mongoose').Types.ObjectId;
 
 var app = express();
 
@@ -144,23 +145,35 @@ app.post('/api/auth/logout', function(req, res) {
 
 
 app.delete('/api/tweets/:tweetId', ensureAuthentication, function(req, res) {
+    var Tweet = conn.model('Tweet');
     var tweetId = req.params.tweetId;
-    var tweet = _.find(fixtures.tweets, { id: tweetId });
 
-    if (req.user.id != tweet.userId){
+    if (!ObjectId.isValid(tweetId)) {
+      return res.sendStatus(400);
+    }
+
+    Tweet.findById(tweetId, function(err, tweet) {
+      if (err) {
+        return res.sendStatus(500);
+      }
+
+      if (!tweet) {
+        return res.sendStatus(404);
+      }
+
+      if (tweet.userId !== req.user.id) {
        return res.sendStatus(403);
-    }
+      }
 
-    if (!_.isUndefined(tweet)) {
-        _.remove(fixtures.tweets, function(tweet) {
-            return tweet.id == tweetId;
-        });
-
+      Tweet.findByIdAndRemove(tweetId, function(err) {
+        if (err) {
+          return res.sendStatus(500);
+        }
         res.sendStatus(200);
-    }
-    else {
-        res.sendStatus(404);
-    }
+      });
+
+    });
+
 });
 
 
