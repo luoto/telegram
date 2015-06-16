@@ -1,29 +1,14 @@
 var _ = require('lodash');
 var express = require('express');
-var session = require('express-session');
 var fixtures = require('./fixtures');
-var bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
 var shortid = require('shortid');
-var passport = require('./auth');
 var config = require('./config');
 var conn = require('./db');
 var ObjectId = require('mongoose').Types.ObjectId;
 
 var app = express();
-
-app.use(bodyParser.json());
-app.use(cookieParser());
-
-app.use(session({
-  secret: 'keyboard cat',
-  resave: false,
-  saveUninitialized: true
-}));
-
-// depends on the other middleware
-app.use(passport.initialize());
-app.use(passport.session());
+var ensureAuthentication = require('./middleware/ensureAuthentication');
+require('./middleware')(app);
 
 app.get('/api/users/:userId', function(req, res) {
     // find and send user in db
