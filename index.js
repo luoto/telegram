@@ -66,21 +66,29 @@ app.get('/api/tweets/:tweetId', function(req, res) {
 });
 
 app.post('/api/users', function(req, res) {
-    var user = req.body.user;
+    var conn = require('./db');
 
-    if (_.find(fixtures.users, { id: user.id })) {
-        res.sendStatus(409);
-    }
+    // grab model reference
+    var User = conn.model('User');
 
-    user.followingIds = [];
-    fixtures.users.push(user);
-
-    // establish session
-    req.login(user, function(err) {
+    // save user to db
+    var user = new User(req.body.user);
+    user.save(function(err) {
       if (err) {
-        return res.sendStatus(500);
+        // if duplicate send 409 - conflict
+        if (err.code === 11000) {
+          return res.sendStatus(409);
+        }
       }
-      res.sendStatus(200);
+
+      // establish session
+      req.login(user, function(err) {
+        if (err) {
+          return res.sendStatus(500);
+        }
+        res.sendStatus(200);
+      });
+
     });
 });
 
