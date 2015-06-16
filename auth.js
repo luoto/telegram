@@ -10,24 +10,25 @@ passport.serializeUser(function(user, done) {
 
 
 passport.deserializeUser(function(id, done) {
-    conn.model('User').findOne({ id: id}, done);
+    conn.model('User').findOne({ id: id }, done);
 });
 
 
 passport.use(new LocalStrategy(verify));
 
+
 function verify(username, password, done) {
-  var user = _.find(fixtures.users, 'id', username);
+  conn.model('User').findOne({ id: username }, function(err, user) {
+    if(!user) {
+      return done(null, false, { message: 'Incorrect username.' });
+    }
 
-  if(!user) {
-    return done(null, false, { message: 'Incorrect username.' });
-  }
+    if(password !== user.password) {
+      return done(null, false, { message: 'Incorrect password.' });
+    }
 
-  if(password !== user.password) {
-    return done(null, false, { message: 'Incorrect password.' });
-  }
-
-  return done(null, user);
+    return done(null, user);
+  });
 };
 
 
