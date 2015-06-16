@@ -24,7 +24,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 app.get('/api/users/:userId', function(req, res) {
     // find and send user in db
     conn.model('User').findOne({ id: req.params.userId }, function(err, user) {
@@ -96,20 +95,16 @@ app.post('/api/users', function(req, res) {
 
 app.post('/api/tweets', ensureAuthentication, function(req, res) {
     var tweet = req.body.tweet;
-
-
-    tweet.created = Math.floor(Date.now() / 1000);
-    tweet.id = shortid.generate();
-
-    // overwrite the userId field with the authenticated user id
     tweet.userId = req.user.id;
+    tweet.created = Math.floor(Date.now() / 1000);
 
-    fixtures.tweets.push(tweet);
-
-    res.send({
-        tweet: tweet
+    // create tweet and send back to client
+    conn.model('Tweet').create(tweet, function(err, tweet) {
+      if (err) {
+        return res.sendStatus(500);
+      }
+      res.send({ tweet: tweet.toClient() });
     });
-
 });
 
 app.post('/api/auth/login', function(req, res, next) {
