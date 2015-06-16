@@ -27,11 +27,14 @@ function verify(username, password, done) {
       return done(null, false, { message: 'Incorrect username.' });
     }
 
-    if(password !== user.password) {
-      return done(null, false, { message: 'Incorrect password.' });
-    }
-
-    return done(null, user);
+    var bcrypt = require('bcrypt');
+    var hash = user.password;
+    bcrypt.compare(password, hash, function(err, res) {
+      if (res == false) {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+      return done(null, user);
+    });
   });
 };
 
