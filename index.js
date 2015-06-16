@@ -7,6 +7,7 @@ var cookieParser = require('cookie-parser');
 var shortid = require('shortid');
 var passport = require('./auth');
 var config = require('./config');
+var conn = require('./db');
 
 var app = express();
 
@@ -66,8 +67,6 @@ app.get('/api/tweets/:tweetId', function(req, res) {
 });
 
 app.post('/api/users', function(req, res) {
-    var conn = require('./db');
-
     // grab model reference
     var User = conn.model('User');
 

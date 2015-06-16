@@ -2,6 +2,7 @@ var _ = require('lodash');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var fixtures = require('./fixtures');
+var conn = require('./db');
 
 passport.serializeUser(function(user, done) {
     done(null, user.id);
@@ -9,15 +10,11 @@ passport.serializeUser(function(user, done) {
 
 
 passport.deserializeUser(function(id, done) {
-    var user = _.find(fixtures.users, 'id', id);
-
-    if (_.isUndefined(user)) {
-        done(null, false);
-    }
-    else {
-        done(null, user);
-    }
+    conn.model('User').findOne({ id: id}, done);
 });
+
+
+passport.use(new LocalStrategy(verify));
 
 function verify(username, password, done) {
   var user = _.find(fixtures.users, 'id', username);
@@ -33,6 +30,5 @@ function verify(username, password, done) {
   return done(null, user);
 };
 
-passport.use(new LocalStrategy(verify));
 
 module.exports = passport;
