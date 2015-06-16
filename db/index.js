@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var config = require('../config');
-var user = require('./schemas/user');
-var tweet = require('./schemas/tweet');
+var userSchema = require('./schemas/user');
+var tweetSchema = require('./schemas/tweet');
 
 var connection = mongoose.createConnection(
   config.get('database:host'),
@@ -9,7 +9,7 @@ var connection = mongoose.createConnection(
   config.get('database:port')
 );
 
-connection.model('User', user);
-connection.model('Tweet', user);
+connection.model('User', userSchema);
+connection.model('Tweet', tweetSchema);
 
 module.exports = connection;
