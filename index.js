@@ -40,33 +40,40 @@ app.get('/api/users/:userId', function(req, res) {
 
 app.get('/api/tweets', function(req, res) {
     var userId = req.query.userId;
-
     if(!userId) {
-        res.sendStatus(400);
+        return res.sendStatus(400);
     }
 
-    var tweets = _.where(fixtures.tweets, { userId: userId });
-    var sortedTweets = tweets.sort(function(t1, t2) {
-        return t2.created - t1.created;
-    });
+    var query = { userId: userId};
+    var options = { sort: { created: -1 }};
+    var Tweet = conn.model("Tweet");
 
-    res.send({
-        tweets: sortedTweets
+    Tweet.find(query, null, options, function(err, tweets) {
+      if (err) {
+        return res.sendStatus(500)
+      }
+      var responseTweets = tweets.map(function(tweet) { return tweet.toClient() })
+      res.send({ tweets: responseTweets })
     });
 });
+
 
 app.get('/api/tweets/:tweetId', function(req, res) {
     var tweetId = req.params.tweetId;
 
-    var tweet = _.find(fixtures.tweets, { id: tweetId });
-
-    if (!_.isUndefined(tweet)) {
-        res.send({ tweet: tweet });
-    }
-    else {
-        res.sendStatus(404);
-    }
+    conn.model('Tweet').findById(tweetId, function(err, tweet) {
+      if (err) {
+        return res.sendStatus(500);
+      }
+      if (!tweet) {
+          res.sendStatus(404);
+      }
+      else {
+          res.send({ tweet: tweet.toClient() });
+      }
+    });
 });
+
 
 app.post('/api/users', function(req, res) {
     // grab model reference
