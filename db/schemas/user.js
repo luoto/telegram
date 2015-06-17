@@ -26,7 +26,6 @@ userSchema.pre('save', function(next) {
   });
 });
 
-
 userSchema.methods.toClient = function() {
   return {
     id: this.id,
@@ -41,6 +40,11 @@ userSchema.statics.findByUserId = function(id, done) {
 userSchema.methods.follow = function(userId, done) {
   var update = { $addToSet: {followingIds: userId } };
   this.model('User').findByIdAndUpdate(this._id, update, done);
+}
+
+userSchema.methods.unfollow = function(userId, done) {
+  var update = { $pull: { followingIds: userId } };
+  this.model('User').findOneAndUpdate(this._id, update, done);
 }
 
 module.exports = userSchema;
