@@ -20,8 +20,17 @@ describe("Test suite POST /api/tweets", function() {
   });
 
   it("test case scenario 1", function(done) {
-    done(null);
+    var request = require('supertest'),
+        app = require('../index');
+
+    var tweet = { "tweet": {"text": "Test tweet", "userId": "test"}};
+
+    request(app)
+      .post('/api/tweets')
+      .send(tweet)
+      .expect(403, done);
   });
+
 
   it("test case scenario 2", function(done) {
     done(null);
