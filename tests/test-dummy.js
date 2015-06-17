@@ -1,6 +1,6 @@
 var fs = require('fs');
 
-describe("Simple tests", function(){
+describe("Simple tests:", function(){
   it('check if dummy file exists', function(done) {
       fs.exists('dummy', function(exists) {
         if (exists) {
