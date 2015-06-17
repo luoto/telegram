@@ -45,6 +45,29 @@ router.post('/', function (req, res) {
   });
 });
 
+// POST /api/users/:userId/follow
+router.post('/:userId/follow', ensureAuthentication, function(req, res) {
+  var User = conn.model('User'),
+      userId = req.params.userId;
+
+      User.findByUserId(userId, function(err, user) {
+        if (err) {
+          return res.sendStatus(500);
+        }
+
+        if (!user) {
+          return res.sendStatus(403);
+        }
+
+        req.user.follow(userId, function(err) {
+          if (err) {
+            return res.sendStatus(500);
+          }
+          res.sendStatus(200);
+        });
+        
+      });
+});
 
 // PUT /api/users/:userId
 router.put('/:userId', ensureAuthentication, function(req, res) {
