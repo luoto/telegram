@@ -1,4 +1,5 @@
-var express = require('express'),
+var _ = require('lodash'),
+    express = require('express'),
     router = express.Router(),
     conn = require('../../db'),
     ObjectId = require('mongoose').Types.ObjectId,
@@ -6,22 +7,29 @@ var express = require('express'),
 
 
 // GET /api/tweets
-router.get('/', function(req, res) {
-    var userId = req.query.userId;
-    if(!userId) {
-        return res.sendStatus(400);
-    }
+router.get('/', ensureAuthentication, function(req, res) {
+    var Tweet = conn.model('Tweet'),
+        stream = req.query.stream,
+        userId = req.query.userId,
+        options = { sort: {created: -1 } },
+        query = null;
 
-    var query = { userId: userId};
-    var options = { sort: { created: -1 }};
-    var Tweet = conn.model("Tweet");
+    if (stream === 'home_timeline') {
+      query = {userId: {$in: req.user.followingIds}};
+    }
+    else if (stream === 'profile_timeline' && userId) {
+      query = {userId: userId};
+    }
+    else {
+      return res.sendStatus(400);
+    }
 
     Tweet.find(query, null, options, function(err, tweets) {
       if (err) {
-        return res.sendStatus(500)
+        return res.sendStatus(500);
       }
-      var responseTweets = tweets.map(function(tweet) { return tweet.toClient() })
-      res.send({ tweets: responseTweets })
+      var responseTweets = tweets.map(function(tweet) {return tweet.toClient();});
+      res.send({tweets: responseTweets});
     });
 });
 
