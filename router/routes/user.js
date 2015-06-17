@@ -34,6 +34,7 @@ router.get('/:userId/friends', function(req, res) {
       return res.sendStatus(404);
     }
 
+    // Use instance methods
     user.getFriends(function(err, friends) {
       if (err) {
         res.sendStatus(500);
@@ -44,6 +45,25 @@ router.get('/:userId/friends', function(req, res) {
   });
 
 });
+
+
+// GET /api/users/:userId/followers
+router.get('/:userId/followers', function(req, res) {
+  var User = conn.model('User'),
+      userId = req.params.userId;
+
+  User.find({followingIds: userId}, function(err, followers) {
+    if (err) {
+      return res.sendStatus(500);
+    }
+    if (followers.length == 0) {
+      return res.sendStatus(404);
+    }
+    var followerList = _.map(followers, function(follower) { return follower.toClient() });
+    res.send({users: followerList});
+  });
+});
+
 
 
 // POST /api/users/
