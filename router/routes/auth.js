@@ -16,7 +16,7 @@ router.post('/login', function(req, res, next) {
         if (err) {
           return res.sendStatus(500);
         }
-        return res.send({ user: user });
+        return res.send({ user: user.toClient() });
     });
   })(req, res, next);
 });

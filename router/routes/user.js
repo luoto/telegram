@@ -14,7 +14,7 @@ router.get('/:userId', function (req, res) {
     if (!user) {
         res.sendStatus(404);
     }
-    res.send({ user: user });
+    res.send({ user: user.toClient() });
   });
 });
 
