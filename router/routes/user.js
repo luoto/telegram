@@ -1,4 +1,5 @@
-var express = require('express'),
+var _ = require('lodash'),
+    express = require('express'),
     router = express.Router(),
     conn = require('../../db'),
     ensureAuthentication = require('../../middleware/ensureAuthentication');
@@ -16,6 +17,32 @@ router.get('/:userId', function (req, res) {
     }
     res.send({ user: user.toClient() });
   });
+});
+
+
+// GET /api/users/:userId/friends
+router.get('/:userId/friends', function(req, res) {
+  var User = conn.model('User'),
+      userId = req.params.userId;
+
+  User.findByUserId(userId, function(err, user) {
+    if (err) {
+      return res.sendStatus(500);
+    }
+
+    if (!user) {
+      return res.sendStatus(404);
+    }
+
+    user.getFriends(function(err, friends) {
+      if (err) {
+        res.sendStatus(500);
+      }
+      var friendsList = friends.map(function(user) { return user.toClient() });
+      res.send({users: friendsList});
+    });
+  });
+
 });
 
 

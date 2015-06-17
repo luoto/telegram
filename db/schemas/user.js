@@ -47,4 +47,8 @@ userSchema.methods.unfollow = function(userId, done) {
   this.model('User').findOneAndUpdate(this._id, update, done);
 }
 
+userSchema.methods.getFriends = function(done) {
+  this.model('User').find({id: {$in: this.followingIds}}, done)
+}
+
 module.exports = userSchema;
