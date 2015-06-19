@@ -23,7 +23,7 @@ router.get('/', ensureAuthentication, function(req, res) {
     else {
       return res.sendStatus(400);
     }
-
+    
     Tweet.find(query, null, options, function(err, tweets) {
       if (err) {
         return res.sendStatus(500);
