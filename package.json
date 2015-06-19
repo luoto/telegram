@@ -22,5 +22,10 @@
     "passport": "^0.2.2",
     "passport-local": "^1.0.0",
     "shortid": "^2.2.2"
+  },
+  "devDependencies": {
+    "chai": "^3.0.0",
+    "supertest": "^1.0.1",
+    "supertest-session": "^1.0.0"
   }
 }
